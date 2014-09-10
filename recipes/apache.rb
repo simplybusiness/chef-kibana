@@ -36,4 +36,9 @@ web_app "#{node['kibana']['webserver_hostname']}-#{node['kibana']['webserver_por
   kibana_dir     node['kibana']['installdir']
   listen_address node['kibana']['webserver_listen']
   listen_port    node['kibana']['webserver_port']
+  ssl_cert       node['kibana']['ssl_certificate']
+  ssl_key        node['kibana']['ssl_key']
+  ldap_dn        node['kibana']['ldap']['user_dn']
+  ldap_password  node['kibana']['ldap']['password']
+  ldap_url       node['kibana']['ldap']['url']
 end
