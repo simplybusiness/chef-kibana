@@ -42,7 +42,7 @@ web_app "#{node['kibana']['webserver_hostname']}-#{node['kibana']['webserver_por
   listen_port_ssl  node['kibana']['webserver_port_ssl']
   ssl_cert         node['kibana']['ssl_certificate']
   ssl_key          node['kibana']['ssl_key']
-  ldap_dn          node['kibana']['ldap']['user_dn']
-  ldap_password    node['kibana']['ldap']['password']
-  ldap_url         node['kibana']['ldap']['url']
+  ldap_dn          node['kibana']['ldap_user_dn']
+  ldap_password    node['kibana']['ldap_password']
+  ldap_url         node['kibana']['ldap_url']
 end

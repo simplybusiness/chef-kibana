@@ -19,11 +19,15 @@
 
 include_recipe "git"
 
-es_instances = node[:opsworks][:layers][node['kibana']['es_role']][:instances]
-es_hosts = es_instances.map{ |name, attrs| attrs['private_ip'] }
+es_role = node[:opsworks][:layers][node['kibana']['es_role']]
 
-unless es_hosts.empty?
-  node.set['kibana']['es_server'] = es_hosts.first
+unless es_role == "elasticsearch_elb"  
+  es_instances = node[:opsworks][:layers][node['kibana']['es_role']][:instances]
+  es_hosts = es_instances.map{ |name, attrs| attrs['private_ip'] }
+
+  unless es_hosts.empty?
+    node.set['kibana']['es_server'] = es_hosts.first
+  end
 end
 
 if node['kibana']['user'].empty?
