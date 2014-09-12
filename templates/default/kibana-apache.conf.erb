@@ -12,7 +12,7 @@
   ServerName <%= @params[:server_name] %>
   SSLEngine On
   SSLCertificateFile <%= @params[:ssl_cert] %>
-  SSLCertificakeKeyFile <%= @params[:ssl_key] %>
+  SSLCertificateKeyFile <%= @params[:ssl_key] %>
 
   DocumentRoot <%= @params[:kibana_dir] %>/current
   <Directory <%= @params[:kibana_dir] %>/current>
