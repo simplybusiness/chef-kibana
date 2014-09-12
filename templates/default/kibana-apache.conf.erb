@@ -1,8 +1,25 @@
+# Courtesy of https://github.com/sgzijl
+<% if @params[:listen_port_ssl] -%>
 <VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port] %>>
   ServerName <%= @params[:server_name] %>
-
   ServerAlias <%= @params[:server_aliases].join(" ") %>
- 
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
+</VirtualHost>
+
+<VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port_ssl] %>>
+  ServerName <%= @params[:server_name] %>
+  SSLEngine On
+  SSLCertificateFile <%= @params[:ssl_cert] %>
+  SSLCertificateKeyFile <%= @params[:ssl_key] %>
+
+<% else -%>
+<VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port] %>>
+  ServerName <%= @params[:server_name] %>
+  ServerAlias <%= @params[:server_aliases].join(" ") %>
+<% end -%>
+
   DocumentRoot <%= @params[:kibana_dir] %>/current
   <Directory <%= @params[:kibana_dir] %>/current>
     Allow from all
@@ -15,21 +32,37 @@
  
   # Set global proxy timeouts
   <Proxy http://<%= @params[:es_server] %>:<%= @params[:es_port] %>>
-    Order allow,deny
-    Allow from all
     ProxySet connectiontimeout=5 timeout=90
   </Proxy>
  
   # Proxy for _aliases and .*/_search
-  <LocationMatch "^(/_aliases|/_nodes|/.*/_mapping|.*/_search)$">
-    ProxyPassMatch http://<%= @params[:es_server] %>:<%= @params[:es_port] %>
-    ProxyPassReverse http://<%= @params[:es_server] %>:<%= @params[:es_port] %>
+  <LocationMatch "^/(_nodes|_aliases|.*/_aliases|_search|.*/_search|_mapping|.*/_mapping)$">
+    RequestHeader set Authorization "Basic <%= Base64.encode64("#{node[:kibana][:es_user]}:#{node[:kibana][:es_password]}").chomp %>"
+    ProxyPassMatch http://<%= @params[:es_server] %>:<%= @params[:es_port] %>/$1
+    ProxyPassReverse http://<%= @params[:es_server] %>:<%= @params[:es_port] %>/$1
   </LocationMatch>
  
   # Proxy for kibana-int/{dashboard,temp} stuff (if you don't want auth on /, then you will want these to be protected)
-  <LocationMatch "^(/kibana-int/dashboard/|/kibana-int/temp).*$">
-    ProxyPassMatch http://<%= @params[:es_server] %>:<%= @params[:es_port] %>
-    ProxyPassReverse http://<%= @params[:es_server] %>:<%= @params[:es_port] %>
+  <LocationMatch "^/(kibana-int/dashboard/|kibana-int/temp)(.*)$">
+    RequestHeader set Authorization "Basic <%= Base64.encode64("#{node[:kibana][:es_user]}:#{node[:kibana][:es_password]}").chomp %>"
+    ProxyPassMatch http://<%= @params[:es_server] %>:<%= @params[:es_port] %>/$1$2
+    ProxyPassReverse http://<%= @params[:es_server] %>:<%= @params[:es_port] %>/$1$2
   </LocationMatch>
+
+  # Optional disable auth for a src IP (eg: your monitoring host or subnet)
+  <Location />
+#    Allow from 5.6.7.8
+#    Deny from all
+    Satisfy any
+
+    AuthLDAPBindDN "<%= @params[:ldap_dn] %>"
+    AuthLDAPBindPassword "<%= @params[:ldap_password] %>"
+    AuthLDAPURL "<%= @params[:ldap_url] %>"
+    AuthType Basic
+    AuthBasicProvider ldap
+    AuthName "Please authenticate (LDAP)"
+    AuthLDAPGroupAttributeIsDN on
+    require valid-user
+  </Location>
  
 </VirtualHost>
