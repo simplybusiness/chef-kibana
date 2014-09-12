@@ -24,21 +24,25 @@ include_recipe "apache2"
 include_recipe "apache2::mod_dir"
 include_recipe "apache2::mod_proxy"
 include_recipe "apache2::mod_proxy_http"
+include_recipe "apache2::mod_authnz_ldap"
+include_recipe "apache2::mod_ldap"
+include_recipe "apache2::mod_ssl"
 
 web_app "#{node['kibana']['webserver_hostname']}-#{node['kibana']['webserver_port']}" do
-  cookbook       node['kibana']['apache']['template_cookbook']
-  docroot        node['kibana']['installdir']
-  template       node['kibana']['apache']['template']
-  es_server      node['kibana']['es_server']
-  es_port        node['kibana']['es_port']
-  server_name    node['kibana']['webserver_hostname']
-  server_aliases node['kibana']['webserver_aliases']
-  kibana_dir     node['kibana']['installdir']
-  listen_address node['kibana']['webserver_listen']
-  listen_port    node['kibana']['webserver_port']
-  ssl_cert       node['kibana']['ssl_certificate']
-  ssl_key        node['kibana']['ssl_key']
-  ldap_dn        node['kibana']['ldap']['user_dn']
-  ldap_password  node['kibana']['ldap']['password']
-  ldap_url       node['kibana']['ldap']['url']
+  cookbook         node['kibana']['apache']['template_cookbook']
+  docroot          node['kibana']['installdir']
+  template         node['kibana']['apache']['template']
+  es_server        node['kibana']['es_server']
+  es_port          node['kibana']['es_port']
+  server_name      node['kibana']['webserver_hostname']
+  server_aliases   node['kibana']['webserver_aliases']
+  kibana_dir       node['kibana']['installdir']
+  listen_address   node['kibana']['webserver_listen']
+  listen_port      node['kibana']['webserver_port']
+  listen_port_ssl  node['kibana']['webserver_port_ssl']
+  ssl_cert         node['kibana']['ssl_certificate']
+  ssl_key          node['kibana']['ssl_key']
+  ldap_dn          node['kibana']['ldap']['user_dn']
+  ldap_password    node['kibana']['ldap']['password']
+  ldap_url         node['kibana']['ldap']['url']
 end
