@@ -1,18 +1,24 @@
 # Courtesy of https://github.com/sgzijl
-<VirtualHost <%= @params[:listen_address] %>:80>
+<% if @params[:listen_port_ssl] -%>
+<VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port] %>>
   ServerName <%= @params[:server_name] %>
-
   ServerAlias <%= @params[:server_aliases].join(" ") %>
   RewriteEngine On
   RewriteCond %{HTTPS} off
   RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI}
 </VirtualHost>
 
-<VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port] %>>
+<VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port_ssl] %>>
   ServerName <%= @params[:server_name] %>
   SSLEngine On
   SSLCertificateFile <%= @params[:ssl_cert] %>
   SSLCertificateKeyFile <%= @params[:ssl_key] %>
+
+<% else -%>
+<VirtualHost <%= @params[:listen_address] %>:<%= @params[:listen_port] %>>
+  ServerName <%= @params[:server_name] %>
+  ServerAlias <%= @params[:server_aliases].join(" ") %>
+<% end -%>
 
   DocumentRoot <%= @params[:kibana_dir] %>/current
   <Directory <%= @params[:kibana_dir] %>/current>
@@ -45,8 +51,8 @@
 
   # Optional disable auth for a src IP (eg: your monitoring host or subnet)
   <Location />
-    Allow from 5.6.7.8
-    Deny from all
+#    Allow from 5.6.7.8
+#    Deny from all
     Satisfy any
 
     AuthLDAPBindDN "<%= @params[:ldap_dn] %>"
