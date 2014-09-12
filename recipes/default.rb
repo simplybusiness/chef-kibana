@@ -19,7 +19,7 @@
 
 include_recipe "git"
 
-es_role = node[:opsworks][:layers][node['kibana']['es_role']]
+es_role = node['kibana']['es_role']
 
 unless es_role == "elasticsearch_elb"  
   es_instances = node[:opsworks][:layers][node['kibana']['es_role']][:instances]
