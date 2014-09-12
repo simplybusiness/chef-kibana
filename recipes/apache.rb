@@ -28,6 +28,13 @@ include_recipe "apache2::mod_authnz_ldap"
 include_recipe "apache2::mod_ldap"
 include_recipe "apache2::mod_ssl"
 
+cookbook_file "/etc/apache2/conf.d/ldap.conf" do
+  source 'ldap.conf'
+  mode '0644'
+  owner 'root'
+  action :create
+end
+
 web_app "#{node['kibana']['webserver_hostname']}-#{node['kibana']['webserver_port']}" do
   cookbook         node['kibana']['apache']['template_cookbook']
   docroot          node['kibana']['installdir']
